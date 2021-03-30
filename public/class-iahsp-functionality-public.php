@@ -149,4 +149,8 @@ class Iahsp_Functionality_Public {
 
   } // /prevent_checkout_if_user_expired()
 
+  public function add_woocommerce_support() {
+    add_theme_support( 'woocommerce' );
+  }
+
 }
