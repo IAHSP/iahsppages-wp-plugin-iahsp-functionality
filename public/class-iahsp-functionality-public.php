@@ -153,4 +153,27 @@ class Iahsp_Functionality_Public {
     add_theme_support( 'woocommerce' );
   }
 
+  public function remove_items_woo_myaccount_nav($navItems) {
+    // Display the array items so we can see what to remove
+    //echo "<pre>" . print_r($navItems, true) . "</pre>";
+
+    $newItems = $navItems;
+
+    $keysToRemove = [
+      "downloads",
+      "edit-account",
+      "rma-requests",
+      "following",
+      "support-tickets"
+    ];
+
+    foreach($keysToRemove as $key) {
+      if ((array_key_exists($key, $newItems)) !== false) {
+        unset($newItems[$key]);
+      }
+    }
+
+    return $newItems;
+  }
+
 }
