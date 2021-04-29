@@ -222,49 +222,49 @@ class Iahsp_Functionality_Public {
 
     // first lets check for the required fields
     if ( empty( $username ) || empty( $password ) || empty( $email ) ) {
-      error_log('Required form field is missing');
+      //error_log('Required form field is missing');
       $reg_errors[] = 'Required form field is missing';
     }
 
     // check that username is good length
     if ( 4 > strlen( $username ) ) {
-      error_log('Username too short. At least 4 characters is required');
+      //error_log('Username too short. At least 4 characters is required');
       $reg_errors[] =  'Username too short. At least 4 characters is required' ;
     }
 
     // check that the username doesn't already exist
     if ( username_exists( $username ) ) {
-      error_log('Sorry, that username already exists!');
+      //error_log('Sorry, that username already exists!');
       $reg_errors[] = 'Sorry, that username already exists!';
     }
 
     // ensure that username is valid for WP
     if ( ! validate_username( $username ) ) {
-      error_log('Sorry, the username you entered is not valid');
+      //error_log('Sorry, the username you entered is not valid');
       $reg_errors[] =  'Sorry, the username you entered is not valid' ;
     }
 
     // ensure PW is longer than 5 char
     if ( 5 > strlen( $password ) ) {
-      error_log('Password length must be greater than 5');
+      //error_log('Password length must be greater than 5');
         $reg_errors[] =  'Password length must be greater than 5' ;
     }
 
     // check that email is valid
     if ( !is_email( $email ) ) {
-      error_log('Email is not valid');
+      //error_log('Email is not valid');
       $reg_errors[] =  'Email is not valid' ;
     }
 
     // check if email exists in WP
     if ( email_exists( $email ) ) {
-      error_log('Email Already in use');
+      //error_log('Email Already in use');
       $reg_errors[] =  'Email Already in use' ;
     }
 
 
     $noErrors = true;
-    error_log("This is before the return");
+    //error_log("This is before the return");
 
     // if any errors, display those bad boyz
     if ( is_wp_error( $reg_errors ) ) {
@@ -274,14 +274,14 @@ class Iahsp_Functionality_Public {
         echo '<div>';
         echo '<strong>ERROR</strong>: ';
         echo $error . '<br/>';
-        error_log("Field Validation Error: {$error}");
+        //error_log("Field Validation Error: {$error}");
         echo '</div>';
       }
 
       $noErrors = false;
-      error_log("Errors found. noErrors is this: {$noErrors}");
+      //error_log("Errors found. noErrors is this: {$noErrors}");
     } else {
-      error_log("Everything worked... noErrors is this: {$noErrors}");
+      //error_log("Everything worked... noErrors is this: {$noErrors}");
       $noErrors = true;
     }
 
@@ -303,11 +303,14 @@ class Iahsp_Functionality_Public {
     );
     $userID = wp_insert_user( $userdata );
     if ($userID) {
-      echo 'Registration complete. Goto <a href="' . get_site_url() . '/wp-login.php">login page</a>.';
-      error_log("userID: {$userID}");
+      // header redirect wont work because header has already been sent,
+      // so we will do a JS redirect
+      echo '<script>window.location.href = "/customer-registration-complete/";</script>';
+      //echo 'Registration complete. Goto <a href="' . get_site_url() . '/wp-login.php">login page</a>.';
+      //error_log("userID: {$userID}");
     } else {
       echo "User registration failed...";
-      error_log("User registration failed...");
+      //error_log("User registration failed...");
     }
   } // complete_registration
 
@@ -333,8 +336,8 @@ class Iahsp_Functionality_Public {
       );
 
 
-      error_log("fieldsAreValid: ");
-      error_log(print_r($fieldsAreValid));
+      //error_log("fieldsAreValid: ");
+      //error_log(print_r($fieldsAreValid));
 
       if ($fieldsAreValid == 1) {
         error_log('stuff worked');
