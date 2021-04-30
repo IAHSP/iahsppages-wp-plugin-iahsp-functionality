@@ -189,11 +189,16 @@ class Iahsp_Functionality_Public {
     </div>
 
     <div class="mb-3">
-    <label for="password">Password <strong>*</strong></label>
-    <input class="form-control" onkeypress="pwStrength()" id="password" type="password" name="password" value="' . ( isset( $password ) ? $password : null ) . '">
-    <label for="password2">Re-type Password <strong>*</strong></label>
-    <input class="form-control" id="password2" type="password2" name="password2" value="' . ( isset( $password2 ) ? $password2 : null ) . '">
-    <span id="password-strength"></span>
+      <div class="mb-2">
+        <label for="password">Password <strong>*</strong></label>
+        <input class="form-control" onkeyup="pwStrength()" id="password" type="password" name="password" value="' . ( isset( $password ) ? $password : null ) . '">
+        <span class="mb-2" id="password-strength"></span>
+      </div>
+      <div class="">
+        <label for="password2">Re-type Password <strong>*</strong></label>
+        <input class="form-control" onkeyup="checkPWsMatch()" id="password2" type="password2" name="password2" value="' . ( isset( $password2 ) ? $password2 : null ) . '">
+        <span class="" id="passwords-match"></span>
+      </div>
     </div>
 
     <div class="mb-3">
@@ -224,19 +229,56 @@ class Iahsp_Functionality_Public {
     <script>
       let pwBlackList;
 
-      document.addEventListener("DOMContentLoaded", function(){
+      // wait till everything is loaded, to ensure that our php call has already loaded the wp script.
+      document.addEventListener("DOMContentLoaded", () => {
         pwBlackList = wp.passwordStrength.userInputBlacklist();
       });
+
+      const checkPWsMatch = () => {
+        const pass1 = document.getElementById("password").value;
+        const pass2 = document.getElementById("password2").value;
+        const pwMatch = document.getElementById("passwords-match");
+        if (pass1 === pass2) {
+          pwMatch.textContent = "Passwords Match!";
+        } else {
+          pwMatch.textContent = "Passwords do not match.";
+        }
+
+      } // checkPWsMatch
 
       const pwStrength = () => {
         const pass1 = document.getElementById("password").value;
         const pass2 = document.getElementById("password2").value;
+        const pwStrengthResult = document.getElementById("password-strength");
         const strength = wp.passwordStrength.meter(
           pass1,
           pwBlackList,
           pass2
         );
         console.log(strength);
+
+        // Add the strength meter results
+        switch ( strength ) {
+        case 2:
+          pwStrengthResult.classList.add( "bad" )
+          pwStrengthResult.textContent = pwsL10n.bad;
+          break;
+        case 3:
+          pwStrengthResult.classList.add( "good" )
+          pwStrengthResult.textContent = pwsL10n.good;
+          break;
+        case 4:
+          pwStrengthResult.classList.add( "strong" )
+          pwStrengthResult.textContent = pwsL10n.strong;
+          break;
+        case 5:
+          pwStrengthResult.classList.add( "short" )
+          pwStrengthResult.textContent = pwsL10n.mismatch;
+          break;
+        default:
+          pwStrengthResult.classList.add( "short" )
+          pwStrengthResult.textContent = pwsL10n.short;
+        }
       } // pwStrength
     </script>
     ';
