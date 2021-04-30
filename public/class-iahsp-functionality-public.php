@@ -177,7 +177,11 @@ class Iahsp_Functionality_Public {
   }
 
   private function display_registration_form( $username, $password, $email, $first_name, $last_name, $nickname ) {
+    // load the WP password strength JS script so we can make use of it on our form
+    wp_enqueue_script( 'password-strength-meter' );
+
     echo '
+
     <form class="" method="post">
     <div class="mb-3">
     <label for="username">Username <strong>*</strong></label>
@@ -186,7 +190,10 @@ class Iahsp_Functionality_Public {
 
     <div class="mb-3">
     <label for="password">Password <strong>*</strong></label>
-    <input class="form-control" type="password" name="password" value="' . ( isset( $password ) ? $password : null ) . '">
+    <input class="form-control" onkeypress="pwStrength()" id="password" type="password" name="password" value="' . ( isset( $password ) ? $password : null ) . '">
+    <label for="password2">Re-type Password <strong>*</strong></label>
+    <input class="form-control" id="password2" type="password2" name="password2" value="' . ( isset( $password2 ) ? $password2 : null ) . '">
+    <span id="password-strength"></span>
     </div>
 
     <div class="mb-3">
@@ -213,11 +220,29 @@ class Iahsp_Functionality_Public {
     <input class="btn btn-primary" type="submit" name="submit" value="Register"/>
     </div>
     </form>
+
+    <script>
+      let pwBlackList;
+
+      document.addEventListener("DOMContentLoaded", function(){
+        pwBlackList = wp.passwordStrength.userInputBlacklist();
+      });
+
+      const pwStrength = () => {
+        const pass1 = document.getElementById("password").value;
+        const pass2 = document.getElementById("password2").value;
+        const strength = wp.passwordStrength.meter(
+          pass1,
+          pwBlackList,
+          pass2
+        );
+        console.log(strength);
+      } // pwStrength
+    </script>
     ';
   }
 
   public function registration_validation( $username, $password, $email, $first_name, $last_name, $nickname )  {
-    //$reg_errors = new WP_Error;
     $reg_errors = array();
 
     // first lets check for the required fields
