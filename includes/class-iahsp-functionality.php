@@ -176,6 +176,9 @@ class Iahsp_Functionality {
     $this->loader->add_action( 'after_setup_theme', $plugin_public, 'add_woocommerce_support' );
     $this->loader->add_filter( 'woocommerce_account_menu_items', $plugin_public, 'remove_items_woo_myaccount_nav', 99 );
 
+    // SHOTCODES HERE
+    add_shortcode( 'iahsp_user_registration', array($plugin_public, 'custom_registration_shortcode') );
+
   }
 
   /**
