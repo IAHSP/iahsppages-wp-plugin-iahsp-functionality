@@ -446,5 +446,25 @@ class Iahsp_Functionality_Public {
     return ob_get_clean();
   } //custom_registration_shortcode
 
+  public function custom_login_page_logo() {
+    $logoURL = get_stylesheet_directory_uri() . "/img/logo/savvy-logo-1.png";
+    echo "
+      <style>
+      body.login #login h1 a, .login h1 a {
+        background-image: url({$logoURL});
+        width:210px;
+        height:88px;
+        background-size: 210px 88px;
+        background-repeat: no-repeat;
+        padding-bottom: 30px;
+      }
+      body.login #loginform .button {
+        background-color: #f1c95c;
+        color: #fff;
+      }
+      </style>
+  ";
+  }
+
 
 }
