@@ -174,6 +174,7 @@ class Iahsp_Functionality {
     $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
     $this->loader->add_action( 'woocommerce_checkout_order_review', $plugin_public, 'prevent_checkout_if_user_expired' );
     $this->loader->add_action( 'after_setup_theme', $plugin_public, 'add_woocommerce_support' );
+    $this->loader->add_action( 'login_enqueue_scripts', $plugin_public, 'custom_login_page_logo' );
     $this->loader->add_filter( 'woocommerce_account_menu_items', $plugin_public, 'remove_items_woo_myaccount_nav', 99 );
 
     // SHOTCODES HERE
