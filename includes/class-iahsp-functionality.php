@@ -188,6 +188,7 @@ class Iahsp_Functionality {
 
     // SHOTCODES HERE
     add_shortcode( 'iahsp_user_registration', array($plugin_public, 'custom_registration_shortcode') );
+    add_shortcode( 'iahsp_reseller_certificate', array($plugin_public, 'reseller_certificate_upload_form_shortcode') );
 
   }
 

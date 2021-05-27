@@ -137,9 +137,10 @@ class Iahsp_Functionality_Admin {
     $resellcert = esc_attr( get_the_author_meta( 'resellCertificate', $userID ) );
     error_log("my login hook worked correctly");
     if (empty($resellcert)) {
-      error_log("reseller cert was found empty. fwd user to resell cert upload page");
+      header("Location: " . "/reseller-certificate-upload");
+      //error_log("reseller cert was found empty. fwd user to resell cert upload page");
     } else {
-      error_log("reseller cert found as {$resellcert}");
+      //error_log("reseller cert found as {$resellcert}");
     }
   }
 

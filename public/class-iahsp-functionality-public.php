@@ -20,6 +20,8 @@
  * @subpackage Iahsp_Functionality/public
  * @author     Gabriel Tumbaga <gabriel@iahsp.com>
  */
+
+
 class Iahsp_Functionality_Public {
 
   /**
@@ -40,6 +42,8 @@ class Iahsp_Functionality_Public {
    */
   private $version;
 
+  private $resellerCertificate;
+
   /**
    * Initialize the class and set its properties.
    *
@@ -51,6 +55,22 @@ class Iahsp_Functionality_Public {
 
     $this->plugin_name = $plugin_name;
     $this->version = $version;
+
+    $this->load_dependencies();
+
+  }
+
+  /**
+   * Load the custom dependencies for this.
+   *
+   */
+  private function load_dependencies() {
+
+    /**
+     * The class responsible for the reseller certificate upload form
+     */
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/reseller-certificate.php';
+    $this->resellerCertificate = new Reseller_Certificate;
 
   }
 
@@ -466,5 +486,8 @@ class Iahsp_Functionality_Public {
   ";
   }
 
+  public function reseller_certificate_upload_form_shortcode() {
+    return $this->resellerCertificate->upload_form_shortcode();
+  } //custom_registration_shortcode
 
 }
