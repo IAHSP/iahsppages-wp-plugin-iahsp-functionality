@@ -164,7 +164,8 @@ class Iahsp_Functionality {
     //$this->loader->add_action( 'personal_options_update', $plugin_admin, 'save_extra_profile_fields' );
     //$this->loader->add_action( 'save_extra_profile_fields', $plugin_admin, 'save_extra_profile_fields' );
                                                                                             //priority 10, request 2 args
-    $this->loader->add_action( 'wp_authenticate', $plugin_admin, 'check_if_user_uploaded_resell_certificate', 1, 1 );
+    //$this->loader->add_action( 'set_current_user', $plugin_admin, 'check_if_user_uploaded_resell_certificate', 10 );
+    $this->loader->add_filter( 'login_redirect', $plugin_admin, 'check_if_user_uploaded_resell_certificate', 1, 3 );
 
   }
 

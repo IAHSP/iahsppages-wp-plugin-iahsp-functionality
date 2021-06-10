@@ -129,15 +129,26 @@ class Iahsp_Functionality_Admin {
     //update_usermeta( $user_id, 'resell-cert', $_POST['resell-cert'] );
   //}
 
-  public function check_if_user_uploaded_resell_certificate ($useremail) {
+  public function check_if_user_uploaded_resell_certificate ($redirect, $request, $user) {
     // if pw is needed, use a 2nd arg and change the args from 1 to 2 on the add_action
     //echo "<pre>GABE WAS HERE!</pre>";
-    $userObj = get_user_by('email', $useremail);
-    $userID = $userObj->data->ID;
-    $resellcert = esc_attr( get_the_author_meta( 'resellCertificate', $userID ) );
+    //global $user;
+    error_log('my function was called... check_if_user_uploaded_resell_certificate');
+    error_log("redirectTo: {$redirect}");
+    $redirect = home_url("/reseller-certificate-upload/");
+    error_log("newRedirect: {$redirect}");
+    error_log(print_r($user, true));
+    return $redirect;
+
+
+
+    //$userObj = get_user_by('email', $useremail);
+    //$userID = $userObj->data->ID;
+    //$resellcert = esc_attr( get_the_author_meta( 'resellCertificate', $userID ) );
     error_log("my login hook worked correctly");
     if (empty($resellcert)) {
-      header("Location: " . "/reseller-certificate-upload");
+      //header("Location: " . "/reseller-certificate-upload");
+      //wp_redirect('/reseller-certificate-upload');
       //error_log("reseller cert was found empty. fwd user to resell cert upload page");
     } else {
       //error_log("reseller cert found as {$resellcert}");
