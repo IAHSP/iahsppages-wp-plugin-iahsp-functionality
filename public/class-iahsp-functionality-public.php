@@ -43,6 +43,7 @@ class Iahsp_Functionality_Public {
   private $version;
 
   private $resellerCertificate;
+  private $vendorCheck;
 
   /**
    * Initialize the class and set its properties.
@@ -70,7 +71,9 @@ class Iahsp_Functionality_Public {
      * The class responsible for the reseller certificate upload form
      */
     require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/reseller-certificate.php';
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/vendor-check.php';
     $this->resellerCertificate = new Reseller_Certificate;
+    $this->vendorCheck = new Vendor_Verification;
 
   }
 
@@ -484,6 +487,10 @@ class Iahsp_Functionality_Public {
       }
       </style>
   ";
+  }
+
+  public function vendor_check_shortcode() {
+    return $this->vendorCheck->vendor_check_shortcode();
   }
 
   public function reseller_certificate_upload_form_shortcode() {
