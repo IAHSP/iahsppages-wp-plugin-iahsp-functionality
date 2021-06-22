@@ -66,9 +66,14 @@ class Vendor_Verification {
         $isExpired = $resultsJSON->payload->isExpired;
         $isVendor = $resultsJSON->payload->userIsVendor;
 
+        //save the user's expiration date, regaurdless if vendor or not.
+        update_user_meta( $uid, 'savvyExpirationDate', $expDate );
+
         if ($isVendor) {
           //error_log('JSON said this user should be a vendor!');
           $vendorPackage = $resultsJSON->payload->vendorPackage;
+          //save the name of the user's vendor package
+          update_user_meta( $uid, 'vendorPackage', $vendorPackage );
 
           // check if hey already have the vendor role
           if ( in_array( 'seller', (array) $currentUserObj->roles ) ) {
@@ -80,6 +85,7 @@ class Vendor_Verification {
             $currentUserObj->set_role('seller');
             //also enable them for selling in dokan
             update_user_meta( $uid, 'dokan_enable_selling', 'yes' );
+
             //refresh the page so the new role can take
             //have to refresh with JS, because header has already been set in PHP
             echo "

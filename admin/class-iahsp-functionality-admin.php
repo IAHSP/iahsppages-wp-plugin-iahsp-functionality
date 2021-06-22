@@ -102,13 +102,18 @@ class Iahsp_Functionality_Admin {
 
   public function display_extra_profile_fields ( $user ) {
     $resellcert = esc_attr( get_the_author_meta( 'resellCertificate', $user->ID ) );
+    $vendorpackage = esc_attr( get_the_author_meta( 'vendorPackage', $user->ID ) );
+    $savvyexpiration = esc_attr( get_the_author_meta( 'savvyExpirationDate', $user->ID ) );
 
     echo "
-      <h2>SAVVY Resell Certificate</h2>
+      <h2>SAVVY</h2>
+    ";
+
+    $field_resellcert = "
       <table class='form-table'>
 
         <tr>
-          <th><label for='resell-cert'>URL</label></th>
+          <th><label for='resell-cert'>Resell Certificate</label></th>
 
           <td>
           <input type='text' name='resell-cert' id='resell-cert' value='{$resellcert}' class='regular-text' readonly /><br />
@@ -118,7 +123,49 @@ class Iahsp_Functionality_Admin {
 
       </table>
     ";
-  }
+
+    $field_vendorpackage = "
+      <table class='form-table'>
+
+        <tr>
+          <th><label for='vendor-package'>Vendor Package</label></th>
+
+          <td>
+          <input type='text' name='vendor-package' id='vendor-package' value='{$vendorpackage}' class='regular-text' readonly /><br />
+          <span class='description'>This is the Vendor Package that was purchased</span>
+          </td>
+        </tr>
+
+      </table>
+    ";
+
+    $field_savvyexpiration = "
+      <table class='form-table'>
+
+        <tr>
+          <th><label for='savvy-exp-date'>Expiration Date</label></th>
+
+          <td>
+          <input type='text' name='savvy-exp-date' id='savvy-exp-date' value='{$savvyexpiration}' class='regular-text' readonly /><br />
+          <span class='description'>This is the Savvy Expiration Date.</span>
+          </td>
+        </tr>
+
+      </table>
+    ";
+
+    if ( in_array( 'seller', (array) $user->roles ) ) {
+      // 'seller' role is vendor, so display the vendor package
+      echo $field_vendorpackage;
+    } else {
+      // if they're not a vendor, they're a normal member, so display the reseller certificate
+      echo $field_resellcert;
+    }
+
+    echo $field_savvyexpiration;
+
+
+  } // display_extra_profile_fields
 
   //intentionally making this not editible from the profile page.
   //public function save_extra_profile_fields( $user_id ) {
