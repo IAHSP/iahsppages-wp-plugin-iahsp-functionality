@@ -133,11 +133,15 @@ class Iahsp_Functionality_Public {
     // before we try anything, are they even logged in?
     if (is_user_logged_in()) {
       // get email
+      $currentUserObj = wp_get_current_user();
+      $uid = $currentUserObj->ID;
+      $userEmail = $currentUserObj->user_email;
+
       $base_gcf_URL = getenv("IAHSP_GCF_URL");
       $url = $base_gcf_URL . "/savvy_check_exp/checkexp";
 
       $body = array(
-        "email" => "gabriel@iahsp.com"
+        "email" => $userEmail
       );
 
       //hit the GCF
@@ -158,9 +162,12 @@ class Iahsp_Functionality_Public {
         $expDate = $resultsJSON->payload->expDate;
         $isExpired = $resultsJSON->payload->isExpired;
 
+        //save the user's expiration date.
+        update_user_meta( $uid, 'savvyExpirationDate', $expDate );
+
         if ($isExpired == true) {
           // user is expired, so lets redirect them.
-          header("Location: " . "/please-register/");
+          header("Location: " . "/please-renew/");
         }
       }
 
