@@ -157,6 +157,17 @@ class Iahsp_Functionality {
     $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
     $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+    //SAVVY
+    $this->loader->add_action( 'show_user_profile', $plugin_admin, 'display_extra_profile_fields' );
+    $this->loader->add_action( 'edit_user_profile', $plugin_admin, 'display_extra_profile_fields' );
+    //intentionally not making this editible from profile page
+    //$this->loader->add_action( 'personal_options_update', $plugin_admin, 'save_extra_profile_fields' );
+    //$this->loader->add_action( 'save_extra_profile_fields', $plugin_admin, 'save_extra_profile_fields' );
+                                                                                            //priority 10, request 2 args
+    // for now, commenting it out.  currently can't find a propper hook that firebase auth
+    // does.  so Christa is fine for now, not requiring the user to upload their resale cert
+    //$this->loader->add_filter( 'login_redirect', $plugin_admin, 'check_if_user_uploaded_resell_certificate', 1, 3 );
+
   }
 
   /**
@@ -179,6 +190,8 @@ class Iahsp_Functionality {
 
     // SHOTCODES HERE
     add_shortcode( 'iahsp_user_registration', array($plugin_public, 'custom_registration_shortcode') );
+    add_shortcode( 'iahsp_reseller_certificate', array($plugin_public, 'reseller_certificate_upload_form_shortcode') );
+    add_shortcode( 'check_if_vendor', array($plugin_public, 'vendor_check_shortcode') );
 
   }
 

@@ -20,6 +20,8 @@
  * @subpackage Iahsp_Functionality/public
  * @author     Gabriel Tumbaga <gabriel@iahsp.com>
  */
+
+
 class Iahsp_Functionality_Public {
 
   /**
@@ -40,6 +42,9 @@ class Iahsp_Functionality_Public {
    */
   private $version;
 
+  private $resellerCertificate;
+  private $vendorCheck;
+
   /**
    * Initialize the class and set its properties.
    *
@@ -51,6 +56,24 @@ class Iahsp_Functionality_Public {
 
     $this->plugin_name = $plugin_name;
     $this->version = $version;
+
+    $this->load_dependencies();
+
+  }
+
+  /**
+   * Load the custom dependencies for this.
+   *
+   */
+  private function load_dependencies() {
+
+    /**
+     * The class responsible for the reseller certificate upload form
+     */
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/reseller-certificate.php';
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/vendor-check.php';
+    $this->resellerCertificate = new Reseller_Certificate;
+    $this->vendorCheck = new Vendor_Verification;
 
   }
 
@@ -110,11 +133,15 @@ class Iahsp_Functionality_Public {
     // before we try anything, are they even logged in?
     if (is_user_logged_in()) {
       // get email
+      $currentUserObj = wp_get_current_user();
+      $uid = $currentUserObj->ID;
+      $userEmail = $currentUserObj->user_email;
+
       $base_gcf_URL = getenv("IAHSP_GCF_URL");
       $url = $base_gcf_URL . "/savvy_check_exp/checkexp";
 
       $body = array(
-        "email" => "gabriel@iahsp.com"
+        "email" => $userEmail
       );
 
       //hit the GCF
@@ -123,7 +150,7 @@ class Iahsp_Functionality_Public {
       curl_setopt($ch, CURLOPT_URL, $url);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-      curl_setopt($ch,CURLOPT_HTTPHEADER,array('Origin: https://pages.iahsp.com', 'Content-Type:application/json'));
+      curl_setopt($ch,CURLOPT_HTTPHEADER,array('Origin: https://shopsavvy.pro', 'Content-Type:application/json'));
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
 
       $result = curl_exec($ch);
@@ -135,9 +162,12 @@ class Iahsp_Functionality_Public {
         $expDate = $resultsJSON->payload->expDate;
         $isExpired = $resultsJSON->payload->isExpired;
 
+        //save the user's expiration date.
+        update_user_meta( $uid, 'savvyExpirationDate', $expDate );
+
         if ($isExpired == true) {
           // user is expired, so lets redirect them.
-          header("Location: " . "/please-register/");
+          header("Location: " . "/please-renew/");
         }
       }
 
@@ -466,5 +496,12 @@ class Iahsp_Functionality_Public {
   ";
   }
 
+  public function vendor_check_shortcode() {
+    return $this->vendorCheck->vendor_check_shortcode();
+  }
+
+  public function reseller_certificate_upload_form_shortcode() {
+    return $this->resellerCertificate->upload_form_shortcode();
+  } //custom_registration_shortcode
 
 }
