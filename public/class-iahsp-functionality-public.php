@@ -504,4 +504,31 @@ class Iahsp_Functionality_Public {
     return $this->resellerCertificate->upload_form_shortcode();
   } //custom_registration_shortcode
 
+  public function vendor_allow_bulk_api_edit($permission, $context, $object_id, $post_type) {
+    error_log("permission: {$permission} / context: {$context} / object_id: {$object_id} / post_type: {$post_type}");
+    if ($context == 'batch') {
+      $request = new WP_REST_Request;
+      $restBody = $request->get_body();
+      error_log("rest body: {$restBody}");
+    }
+    error_log('-------');
+    if ($post_type == 'product') {
+      // Get current user
+      $user = wp_get_current_user();
+
+      // Check if user has vendor role
+      if ( in_array( 'seller', (array) $user->roles ) ) {
+        //The user has the vendor role of "seller" role
+
+        //check if author of product matches current user
+
+        //everything checks out, return 
+        return $permission;
+      } else {
+        return 0;
+      }
+    }
+
+  
+  }
 }

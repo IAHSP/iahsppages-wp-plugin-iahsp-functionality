@@ -187,6 +187,7 @@ class Iahsp_Functionality {
     $this->loader->add_action( 'after_setup_theme', $plugin_public, 'add_woocommerce_support' );
     $this->loader->add_action( 'login_enqueue_scripts', $plugin_public, 'custom_login_page_logo' );
     $this->loader->add_filter( 'woocommerce_account_menu_items', $plugin_public, 'remove_items_woo_myaccount_nav', 99 );
+    $this->loader->add_filter( 'woocommerce_rest_check_permissions', $plugin_public, 'vendor_allow_bulk_api_edit', 99, 4 );
 
     // SHOTCODES HERE
     add_shortcode( 'iahsp_user_registration', array($plugin_public, 'custom_registration_shortcode') );
