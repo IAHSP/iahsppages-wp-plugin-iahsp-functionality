@@ -504,4 +504,63 @@ class Iahsp_Functionality_Public {
     return $this->resellerCertificate->upload_form_shortcode();
   } //custom_registration_shortcode
 
+  public function allow_woo_api_bulk_edit($permission, $context, $object_id, $post_type) {
+    error_log("permission: {$permission}, context: {$context}, object_id: {$object_id}, post_type: {$post_type}");
+    if ($context == "batch" && $post_type == "product") {
+      return 1;
+    } else {
+      return $permission;
+    }
+  }
+
+  //public function register_inventory_update_bulk() {
+    ////
+  //}
+
+  public function register_inventory_get_levels() {
+    register_rest_route( 'wc/v3', 'savvy-inventory', array(
+      'methods' => 'GET',
+      'callback' => array($this, 'inventory_get_levels')
+    ));
+  }
+
+  //public function inventory_update_bulk() {
+    ////
+  //}
+
+  public function inventory_get_levels(WP_REST_Request $request) {
+    //error_log(print_r($payload, true));
+    $allParams = $request->get_params();
+    error_log(print_r($allParams, true));
+
+    // if they got this far, then their auth already worked. (thanks wordpress!)
+    $currentUser = wp_get_current_user();
+    $currentUID = $currentUser->ID;
+
+    $thisVendorsProducts = wc_get_products( array(
+      'status'    => 'publish',
+      'limit'     => -1,
+      'author'    => $currentUID
+    ));
+
+    $productsCollection = [];
+
+    foreach ($thisVendorsProducts as $singleProduct) {
+      $product = [
+        "sku" => $singleProduct->sku,
+        "id" => $singleProduct->id,
+        "name" => $singleProduct->get_title()
+      ];
+
+      $productsCollection[] = $product;
+      error_log(print_r($product, true));
+    }
+
+
+    //header('Content-type: application/json');
+    //return json_encode($productsCollection);
+    return $productsCollection;
+  }
+
+
 }
