@@ -504,18 +504,12 @@ class Iahsp_Functionality_Public {
     return $this->resellerCertificate->upload_form_shortcode();
   } //custom_registration_shortcode
 
-  public function allow_woo_api_bulk_edit($permission, $context, $object_id, $post_type) {
-    error_log("permission: {$permission}, context: {$context}, object_id: {$object_id}, post_type: {$post_type}");
-    if ($context == "batch" && $post_type == "product") {
-      return 1;
-    } else {
-      return $permission;
-    }
+  public function register_inventory_update_bulk() {
+    register_rest_route( 'wc/v3', 'savvy-inventory', array(
+      'methods' => 'PUT',
+      'callback' => array($this, 'inventory_update_bulk')
+    ));
   }
-
-  //public function register_inventory_update_bulk() {
-    ////
-  //}
 
   public function register_inventory_get_levels() {
     register_rest_route( 'wc/v3', 'savvy-inventory', array(
@@ -524,14 +518,44 @@ class Iahsp_Functionality_Public {
     ));
   }
 
-  //public function inventory_update_bulk() {
-    ////
-  //}
+  public function inventory_update_bulk(WP_REST_Request $request) {
+    $allParams = $request->get_params();
+
+    // if they got this far, then their auth already worked. (thanks wordpress!)
+    $currentUser = wp_get_current_user();
+    $currentUID = $currentUser->ID;
+
+    $payload = $request->get_params();
+
+    //error_log(print_r($payload, true));
+
+    if ($payload['update']) {
+      //error_log(print_r($request['update'], true));
+      foreach ($payload['update'] as $item) {
+        if ( (!$item['sku']) && (!$item['id']) ) {
+          return [
+            "error" => "Product sku or id must be specified."
+          ];
+        }
+
+        // lets get the product ID, either from the SKU, or already specified in the body
+        $productID = (!$item['id']) ? wc_get_product_id_by_sku( $item['sku'] ) : $item['id'];
+        $productQuantity = intval($item['stock_quantity']);
+
+        $productObj = wc_get_product( $productID );
+        $productObj->set_stock_quantity($productQuantity);
+
+        error_log("update: {$productID} with this much: {$productQuantity}");
+      } //foreach
+    } else {
+      return [
+        "error" => "Nothing specified to update."
+      ];
+    }
+  }
 
   public function inventory_get_levels(WP_REST_Request $request) {
-    //error_log(print_r($payload, true));
     $allParams = $request->get_params();
-    error_log(print_r($allParams, true));
 
     // if they got this far, then their auth already worked. (thanks wordpress!)
     $currentUser = wp_get_current_user();
@@ -553,12 +577,11 @@ class Iahsp_Functionality_Public {
       ];
 
       $productsCollection[] = $product;
-      error_log(print_r($product, true));
+      //error_log(print_r($product, true));
     }
 
 
-    //header('Content-type: application/json');
-    //return json_encode($productsCollection);
+    // no need to send json header, or json encode, it's handled by the built in stuffs
     return $productsCollection;
   }
 
