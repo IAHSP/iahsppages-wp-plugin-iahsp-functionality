@@ -543,7 +543,10 @@ class Iahsp_Functionality_Public {
         $productQuantity = intval($item['stock_quantity']);
 
         $productObj = wc_get_product( $productID );
+        //$productObj  = new WC_Product($productID);
+        $productObj->set_manage_stock(true); //just in case manage stock is turned off
         $productObj->set_stock_quantity($productQuantity);
+        $productObj->save(); //without save, the change doesn't happen :o
 
         error_log("update: {$productID} with this much: {$productQuantity}");
       } //foreach
