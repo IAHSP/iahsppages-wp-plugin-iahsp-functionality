@@ -519,7 +519,9 @@ class Iahsp_Functionality_Public {
   }
 
   public function inventory_update_bulk(WP_REST_Request $request) {
-    $allParams = $request->get_params();
+    //$allParams = $request->get_params();
+    $prodIDsHolder = [];
+    $productsCollection = [];
 
     // if they got this far, then their auth already worked. (thanks wordpress!)
     $currentUser = wp_get_current_user();
@@ -548,17 +550,33 @@ class Iahsp_Functionality_Public {
         $productObj->set_stock_quantity($productQuantity);
         $productObj->save(); //without save, the change doesn't happen :o
 
+        $prodIDsHolder[] = $productID;
+
         error_log("update: {$productID} with this much: {$productQuantity}");
       } //foreach
     } else {
       return [
         "error" => "Nothing specified to update."
       ];
-    }
+    } //endif
+
+    //after successful inserts, lets grab inventory levels and return 
+    foreach($prodIDsHolder as $pid) {
+      $currentProduct = wc_get_product($pid);
+      $product = [
+        "sku" => $currentProduct->get_sku(),
+        "id" => $currentProduct->get_id(),
+        "stock_quantity" => $currentProduct->get_stock_quantity(),
+        "name" => $currentProduct->get_title()
+      ];
+      $productsCollection[] = $product;
+    } // foreach
+
+    return $productsCollection;
   }
 
-  public function inventory_get_levels(WP_REST_Request $request) {
-    $allParams = $request->get_params();
+  public function inventory_get_levels() {
+    //$allParams = $request->get_params();
 
     // if they got this far, then their auth already worked. (thanks wordpress!)
     $currentUser = wp_get_current_user();
@@ -574,8 +592,9 @@ class Iahsp_Functionality_Public {
 
     foreach ($thisVendorsProducts as $singleProduct) {
       $product = [
-        "sku" => $singleProduct->sku,
-        "id" => $singleProduct->id,
+        "sku" => $singleProduct->get_sku(),
+        "id" => $singleProduct->get_id(),
+        "stock_quantity" => $singleProduct->get_stock_quantity(),
         "name" => $singleProduct->get_title()
       ];
 
