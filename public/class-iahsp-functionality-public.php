@@ -599,29 +599,37 @@ class Iahsp_Functionality_Public {
     $currentUser = wp_get_current_user();
     $currentUID = $currentUser->ID;
 
-    $thisVendorsProducts = wc_get_products( array(
-      'status'    => 'publish',
-      'limit'     => -1,
-      'author'    => $currentUID
-    ));
+    if ($currentUID >= 1) {
+      //error_log("current user: {$currentUID}");
+      $thisVendorsProducts = wc_get_products( array(
+        'status'    => 'publish',
+        'limit'     => -1,
+        'author'    => $currentUID
+      ));
 
-    $productsCollection = [];
+      $productsCollection = [];
 
-    foreach ($thisVendorsProducts as $singleProduct) {
-      $product = [
-        "sku" => $singleProduct->get_sku(),
-        "id" => $singleProduct->get_id(),
-        "stock_quantity" => $singleProduct->get_stock_quantity(),
-        "name" => $singleProduct->get_title()
+      foreach ($thisVendorsProducts as $singleProduct) {
+        $product = [
+          "sku" => $singleProduct->get_sku(),
+          "id" => $singleProduct->get_id(),
+          "stock_quantity" => $singleProduct->get_stock_quantity(),
+          "name" => $singleProduct->get_title()
+        ];
+
+        $productsCollection[] = $product;
+        //error_log(print_r($product, true));
+      }
+
+
+      // no need to send json header, or json encode, it's handled by the built in stuffs
+      return $productsCollection;
+    } else {
+      return [
+        "error" => "access denied"
       ];
-
-      $productsCollection[] = $product;
-      //error_log(print_r($product, true));
     }
 
-
-    // no need to send json header, or json encode, it's handled by the built in stuffs
-    return $productsCollection;
   }
 
 
