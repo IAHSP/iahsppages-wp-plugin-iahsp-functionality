@@ -521,6 +521,7 @@ class Iahsp_Functionality_Public {
   public function inventory_update_bulk(WP_REST_Request $request) {
     //$allParams = $request->get_params();
     $prodIDsHolder = [];
+    $failedProdIDsHolder = [];
     $productsCollection = [];
 
     // if they got this far, then their auth already worked. (thanks wordpress!)
@@ -544,15 +545,24 @@ class Iahsp_Functionality_Public {
         $productID = (!$item['id']) ? wc_get_product_id_by_sku( $item['sku'] ) : $item['id'];
         $productQuantity = intval($item['stock_quantity']);
 
-        $productObj = wc_get_product( $productID );
         //$productObj  = new WC_Product($productID);
-        $productObj->set_manage_stock(true); //just in case manage stock is turned off
-        $productObj->set_stock_quantity($productQuantity);
-        $productObj->save(); //without save, the change doesn't happen :o
+        //$authorCheck = $productObj->get_id();
+        $authorCheckID = get_post_field('post_author', $productID);
+        error_log("current author is: " . $authorCheck);
 
-        $prodIDsHolder[] = $productID;
+        if ($currentUID == $authorCheckID) {
+          $productObj = wc_get_product( $productID );
+          $productObj->set_manage_stock(true); //just in case manage stock is turned off
+          $productObj->set_stock_quantity($productQuantity);
+          $productObj->save(); //without save, the change doesn't happen :o
 
-        error_log("update: {$productID} with this much: {$productQuantity}");
+          $prodIDsHolder[] = $productID;
+        } else {
+          //current user does not own product they are trying to edit
+          $failedProdIDsHolder[] = $productID;
+        }
+
+        //error_log("update: {$productID} with this much: {$productQuantity}");
       } //foreach
     } else {
       return [
@@ -561,6 +571,13 @@ class Iahsp_Functionality_Public {
     } //endif
 
     //after successful inserts, lets grab inventory levels and return 
+    foreach ($failedProdIDsHolder as $pid) {
+      $product = [
+        "id" => $pid,
+        "error" => "unauthorized to edit product."
+      ];
+      $productsCollection[] = $product;
+    }
     foreach($prodIDsHolder as $pid) {
       $currentProduct = wc_get_product($pid);
       $product = [
