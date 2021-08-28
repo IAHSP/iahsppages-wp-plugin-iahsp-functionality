@@ -528,6 +528,12 @@ class Iahsp_Functionality_Public {
     $currentUser = wp_get_current_user();
     $currentUID = $currentUser->ID;
 
+    if ($currentUID == 0) {
+      return [
+        "error" => "access denied"
+      ];
+    }
+
     $payload = $request->get_params();
 
     //error_log(print_r($payload, true));
@@ -543,6 +549,7 @@ class Iahsp_Functionality_Public {
 
         // lets get the product ID, either from the SKU, or already specified in the body
         $productID = (!$item['id']) ? wc_get_product_id_by_sku( $item['sku'] ) : $item['id'];
+        $initialGivenKey = ($item['id']) ? $item['id'] : $item['sku'];
         $productQuantity = intval($item['stock_quantity']);
 
         //$productObj  = new WC_Product($productID);
@@ -559,7 +566,7 @@ class Iahsp_Functionality_Public {
           $prodIDsHolder[] = $productID;
         } else {
           //current user does not own product they are trying to edit
-          $failedProdIDsHolder[] = $productID;
+          $failedProdIDsHolder[] = $initialGivenKey;
         }
 
         //error_log("update: {$productID} with this much: {$productQuantity}");
@@ -571,10 +578,9 @@ class Iahsp_Functionality_Public {
     } //endif
 
     //after successful inserts, lets grab inventory levels and return 
-    foreach ($failedProdIDsHolder as $pid) {
+    foreach ($failedProdIDsHolder as $pidOrSKU) {
       $product = [
-        "id" => $pid,
-        "error" => "unauthorized to edit product."
+        "error" => "Product '{$pidOrSKU}' is not found."
       ];
       $productsCollection[] = $product;
     }
