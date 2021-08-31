@@ -555,7 +555,7 @@ class Iahsp_Functionality_Public {
         //$productObj  = new WC_Product($productID);
         //$authorCheck = $productObj->get_id();
         $authorCheckID = get_post_field('post_author', $productID);
-        error_log("current author is: " . $authorCheck);
+        //error_log("current author is: " . $authorCheck);
 
         if ($currentUID == $authorCheckID) {
           $productObj = wc_get_product( $productID );
