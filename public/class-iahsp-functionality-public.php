@@ -504,4 +504,139 @@ class Iahsp_Functionality_Public {
     return $this->resellerCertificate->upload_form_shortcode();
   } //custom_registration_shortcode
 
+  public function register_inventory_update_bulk() {
+    register_rest_route( 'wc/v3', 'savvy-inventory', array(
+      'methods' => 'PUT',
+      'callback' => array($this, 'inventory_update_bulk')
+    ));
+  }
+
+  public function register_inventory_get_levels() {
+    register_rest_route( 'wc/v3', 'savvy-inventory', array(
+      'methods' => 'GET',
+      'callback' => array($this, 'inventory_get_levels')
+    ));
+  }
+
+  public function inventory_update_bulk(WP_REST_Request $request) {
+    //$allParams = $request->get_params();
+    $prodIDsHolder = [];
+    $failedProdIDsHolder = [];
+    $productsCollection = [];
+
+    // if they got this far, then their auth already worked. (thanks wordpress!)
+    $currentUser = wp_get_current_user();
+    $currentUID = $currentUser->ID;
+
+    if ($currentUID == 0) {
+      return [
+        "error" => "access denied"
+      ];
+    }
+
+    $payload = $request->get_params();
+
+    //error_log(print_r($payload, true));
+
+    if ($payload['update']) {
+      //error_log(print_r($request['update'], true));
+      foreach ($payload['update'] as $item) {
+        if ( (!$item['sku']) && (!$item['id']) ) {
+          return [
+            "error" => "Product sku or id must be specified."
+          ];
+        }
+
+        // lets get the product ID, either from the SKU, or already specified in the body
+        $productID = (!$item['id']) ? wc_get_product_id_by_sku( $item['sku'] ) : $item['id'];
+        $initialGivenKey = ($item['id']) ? $item['id'] : $item['sku'];
+        $productQuantity = intval($item['stock_quantity']);
+
+        //$productObj  = new WC_Product($productID);
+        //$authorCheck = $productObj->get_id();
+        $authorCheckID = get_post_field('post_author', $productID);
+        //error_log("current author is: " . $authorCheck);
+
+        if ($currentUID == $authorCheckID) {
+          $productObj = wc_get_product( $productID );
+          $productObj->set_manage_stock(true); //just in case manage stock is turned off
+          $productObj->set_stock_quantity($productQuantity);
+          $productObj->save(); //without save, the change doesn't happen :o
+
+          $prodIDsHolder[] = $productID;
+        } else {
+          //current user does not own product they are trying to edit
+          $failedProdIDsHolder[] = $initialGivenKey;
+        }
+
+        //error_log("update: {$productID} with this much: {$productQuantity}");
+      } //foreach
+    } else {
+      return [
+        "error" => "Nothing specified to update."
+      ];
+    } //endif
+
+    //after successful inserts, lets grab inventory levels and return 
+    foreach ($failedProdIDsHolder as $pidOrSKU) {
+      $product = [
+        "error" => "Product '{$pidOrSKU}' is not found."
+      ];
+      $productsCollection[] = $product;
+    }
+    foreach($prodIDsHolder as $pid) {
+      $currentProduct = wc_get_product($pid);
+      $product = [
+        "sku" => $currentProduct->get_sku(),
+        "id" => $currentProduct->get_id(),
+        "stock_quantity" => $currentProduct->get_stock_quantity(),
+        "name" => $currentProduct->get_title()
+      ];
+      $productsCollection[] = $product;
+    } // foreach
+
+    return $productsCollection;
+  }
+
+  public function inventory_get_levels() {
+    //$allParams = $request->get_params();
+
+    // if they got this far, then their auth already worked. (thanks wordpress!)
+    $currentUser = wp_get_current_user();
+    $currentUID = $currentUser->ID;
+
+    if ($currentUID >= 1) {
+      //error_log("current user: {$currentUID}");
+      $thisVendorsProducts = wc_get_products( array(
+        'status'    => 'publish',
+        'limit'     => -1,
+        'author'    => $currentUID
+      ));
+
+      $productsCollection = [];
+
+      foreach ($thisVendorsProducts as $singleProduct) {
+        $product = [
+          "sku" => $singleProduct->get_sku(),
+          "id" => $singleProduct->get_id(),
+          "stock_quantity" => $singleProduct->get_stock_quantity(),
+          "name" => $singleProduct->get_title()
+        ];
+
+        $productsCollection[] = $product;
+        //error_log(print_r($product, true));
+      }
+
+
+      // no need to send json header, or json encode, it's handled by the built in stuffs
+      return $productsCollection;
+    } else {
+      return [
+        "error" => "access denied"
+      ];
+    }
+
+  }
+
+
 }
